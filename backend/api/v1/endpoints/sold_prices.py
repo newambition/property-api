@@ -80,7 +80,8 @@ async def get_sold_prices(
                 new_build=prop.new_build_flag == 'Y',
                 tenure=prop.tenure_type,
                 address=address,
-                geometry=prop.location,
+                latitude=prop.location.y,
+                longitude=prop.location.x,
             )
         )
     return response_data

@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import L from "leaflet";
 import useApi from "../hooks/useApi";
@@ -51,21 +51,23 @@ const MapComponent = () => {
 
       {/* MarkerClusterGroup handles displaying many markers efficiently */}
       <MarkerClusterGroup>
-        {properties?.map((prop) => (
-           if (prop.latitude && prop.longitude) {
-             return (
-               <Marker key={prop.transaction_id} position={[prop.latitude, prop.longitude]}>
-                 <Popup>
-                   <b>Address:</b> {prop.address} <br />
-                   <b>Price:</b> £{prop.price.toLocaleString()} <br />
-                   <b>Date:</b> {prop.date_of_transfer}
-                 </Popup>
-               </Marker>
-             );
-           }
-           return null;
-          
-        ))}
+        {properties?.map((prop) => {
+          if (prop.latitude && prop.longitude) {
+            return (
+              <Marker
+                key={prop.transaction_id}
+                position={[prop.latitude, prop.longitude]}
+              >
+                <Popup>
+                  <b>Address:</b> {prop.address} <br />
+                  <b>Price:</b> £{prop.price.toLocaleString()} <br />
+                  <b>Date:</b> {prop.date_of_transfer}
+                </Popup>
+              </Marker>
+            );
+          }
+          return null;
+        })}
       </MarkerClusterGroup>
     </MapContainer>
   );

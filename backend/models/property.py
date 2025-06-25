@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
-from geoalchemy2 import Geometry
+
 
 class PropertySoldPrice(BaseModel):
     """Defines the data structure for a single sold property price record returned by the API."""
@@ -11,7 +11,8 @@ class PropertySoldPrice(BaseModel):
     new_build: bool
     tenure: str
     address: str
-    geometry: Geometry
+    latitude: float
+    longitude: float
 
 class PropertyEpc(BaseModel):
     """Defines the data structure for a single EPC record."""
