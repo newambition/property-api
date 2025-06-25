@@ -1,0 +1,58 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "High-level rules, conventions, and tech stack overview for the entire project."
+globs: ["**/*.py"]
+alwaysApply: true
+---
+
+# General Project Rules
+
+This document outlines the core principles and conventions for the Python FastAPI backend.
+
+## 1. Technology Stack
+
+- **Backend Framework**: Python with FastAPI.
+- **Database**: PostgreSQL with the PostGIS extension.
+- **Data Access**: SQLAlchemy ORM.
+- **Geospatial**: `pgeocode` for geocoding, `geoalchemy2` and `shapely` for DB operations.
+- **Security**: API Keys and `slowapi` for rate limiting.
+- **Data Handling**: `pandas` is used for initial data loading and processing.
+
+## 2. Naming Conventions
+
+- **Python Files**: Use `snake_case` (e.g., `sold_prices.py`).
+- **Directories**: Use `snake_case` (e.g., `api/v1/`).
+- **Variables & Functions**: Use `snake_case` (e.g., `clean_postcode`).
+- **Classes**: Use `PascalCase` (e.g., `PropertyEpc`).
+
+## 3. Import Order
+
+Always structure imports in the following order, separated by a blank line:
+1.  Python standard library imports (`typing`, `os`, etc.).
+2.  Third-party library imports (`fastapi`, `sqlalchemy`, `pandas`, etc.).
+3.  Local application imports (`core`, `db`, `models`, etc.).
+
+**Good example from @api/v1/endpoints/epc.py**
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm.session import Session
+
+from core.limiter import limiter
+from core.security import get_api_key
+from db.session import get_db
+from models.epc import EpcData
+
+
+## 4. Type Hinting
+
+- All function definitions (including parameters and return values) **must** include type hints.
+- This is critical for FastAPI's automatic request validation and response model generation.
+
+```python
+# Correct usage
+def geocode_postcode(postcode: str) -> Point | None:
+    # ...

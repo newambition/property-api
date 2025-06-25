@@ -1,0 +1,59 @@
+---
+description: 
+globs: **/endpoints/**/*.py
+alwaysApply: false
+---
+---
+description: "Rules for defining FastAPI API endpoints to ensure security and consistency."
+globs: ["**/endpoints/**/*.py"]
+alwaysApply: false
+---
+
+# API Endpoint Rules
+
+These rules apply to all API route handlers, typically located in `api/v1/endpoints/`.
+
+## 1. Security First
+
+- **API Key Required**: Every endpoint **must** be protected with an API key. Add `Depends(get_api_key)` to the main `dependencies` list in the router decorator.
+- **Rate Limiting**: Every endpoint **must** have a rate limit applied. Use the `@limiter.limit()` decorator directly above the function definition. A default of `"15/minute"` is standard for data-intensive endpoints.
+
+```python
+# Correct endpoint security from @api/v1/endpoints/sold_prices.py
+@router.get(
+    "/sold-prices",
+    # ...
+    dependencies=[Depends(get_api_key)],
+)
+@limiter.limit("15/minute")
+async def get_sold_prices(...):
+    # ...
+  ```
+
+## 2. Endpoint Definition
+* Summary: Every endpoint must have a concise summary string that clearly describes its function. This is used in the OpenAPI documentation.
+* Response Model: Every endpoint must define a response_model. This ensures the output is validated against a Pydantic model and properly documented.
+* Docstrings: Provide a clear docstring explaining the endpoint's purpose, behavior, and any parameters.
+
+```
+Python
+# Good example from @api/v1/endpoints/epc.py
+@router.get(
+    "/epc",
+    response_model=List[PropertyEpc],
+    summary="Get Energy Performance Certificate (EPC) data by postcode",
+    dependencies=[Depends(get_api_key)]
+)
+async def get_epc_by_postcode(...):
+    """
+    Retrieves EPC data for properties matching a given postcode.
+    
+    - **postcode**: The UK postcode to search for (case-insensitive, ignores spaces).
+    """
+    # ...
+```    
+
+## 3. Dependencies
+* Use FastAPI's dependency injection system (Depends(...)) for accessing shared resources like the database session or configuration.
+* The database session must be injected using db: Session = Depends(get_db).
+* The Request object should be included for rate limiting: request: Request.

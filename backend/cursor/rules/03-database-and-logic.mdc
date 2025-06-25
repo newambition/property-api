@@ -1,0 +1,72 @@
+---
+description: 
+globs: **/endpoints/**/*.py
+alwaysApply: false
+---
+---
+description: "Rules for database queries, business logic, and data transformation."
+globs: ["**/endpoints/**/*.py", "**/crud/**/*.py"]
+alwaysApply: false
+---
+
+# Database & Business Logic Rules
+
+## 1. Database Query Pattern
+
+All database queries must follow this structure to ensure safety and consistency.
+
+- **Use SQLAlchemy ORM**: Construct queries using `db.query(Model)`.
+- **Wrap in `try...except`**: All database operations must be enclosed in a `try...except Exception` block.
+- **Handle Errors**: On exception, log the error and raise a generic `HTTPException(status_code=500, detail="...")`. Do not expose raw database error messages to the client.
+- **Limit Results**: Always apply a `.limit()` to your queries to prevent excessive data retrieval. A sensible default is `100`.
+
+```python
+# Reference implementation from @api/v1/endpoints/epc.py
+try:
+    results = (
+        db.query(EpcData)
+        .filter(EpcData.postcode == clean_postcode)
+        .order_by(EpcData.lodgement_date.desc())
+        .limit(100)
+        .all()
+    )
+except Exception as e:
+    print(f"EPC Database query failed: {e}") # Or use a proper logger
+    raise HTTPException(status_code=500, detail="Internal server error during data retrieval.")
+```
+
+## 2. Geospatial Queries
+
+* For location-based searches, use the ST_DWithin PostGIS function via sqlalchemy.func.
+* Convert postcodes to Point objects using the geocode_postcode utility before querying.
+* The SRID (Spatial Reference System Identifier) for WGS 84 is 4326. Always use this when creating points from longitude/latitude.
+
+```
+Python
+# Reference implementation from @api/v1/endpoints/sold_prices.py
+center_point = geocode_postcode(postcode)
+# ...
+query = query.filter(func.ST_DWithin(
+    PricePaid.location,
+    from_shape(center_point, srid=4326),
+    radius_m
+))
+```
+## 3. Data Transformation
+* Map to Response Model: Database ORM objects (like EpcData or PricePaid) are not returned directly.
+* Always iterate through the query results and explicitly create instances of the Pydantic response_model (e.g., PropertyEpc, PropertySoldPrice). This decouples the API response from the database schema.
+
+```
+Python
+# Correct mapping from @api/v1/endpoints/epc.py
+response_data = []
+for prop in results:
+    response_data.append(
+        PropertyEpc(
+            address=prop.address,
+            postcode=prop.postcode,
+            # ... and so on
+        )
+    )
+return response_data
+```
