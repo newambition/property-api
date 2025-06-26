@@ -1,7 +1,7 @@
 ---
 description: 
-globs: **/endpoints/**/*.py
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 ---
 description: "Rules for defining FastAPI API endpoints to ensure security and consistency."

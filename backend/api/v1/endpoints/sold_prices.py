@@ -4,7 +4,7 @@ import pgeocode
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
-from geoalchemy2.shape import from_shape
+from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
 
 from core.security import get_api_key
@@ -71,8 +71,21 @@ async def get_sold_prices(
     for prop in results:
         address_parts = [prop.paon, prop.saon, prop.street]
         address = " ".join(filter(None, address_parts))
+        
+        # Extract latitude and longitude from the spatial location data
+        latitude = None
+        longitude = None
+        if prop.location:
+            try:
+                point = to_shape(prop.location)
+                latitude = point.y
+                longitude = point.x
+            except Exception as e:
+                print(f"Error extracting coordinates: {e}")
+        
         response_data.append(
             PropertySoldPrice(
+                transaction_id=prop.transaction_id,
                 price=prop.price,
                 date_of_transfer=prop.date_of_transfer.isoformat(),
                 postcode=prop.postcode,
@@ -80,8 +93,8 @@ async def get_sold_prices(
                 new_build=prop.new_build_flag == 'Y',
                 tenure=prop.tenure_type,
                 address=address,
-                latitude=prop.location.y,
-                longitude=prop.location.x,
+                latitude=latitude,
+                longitude=longitude,
             )
         )
     return response_data

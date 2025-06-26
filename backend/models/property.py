@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 class PropertySoldPrice(BaseModel):
     """Defines the data structure for a single sold property price record returned by the API."""
+    transaction_id: str
     price: int
     date_of_transfer: str
     postcode: str
@@ -11,8 +12,8 @@ class PropertySoldPrice(BaseModel):
     new_build: bool
     tenure: str
     address: str
-    latitude: float
-    longitude: float
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 class PropertyEpc(BaseModel):
     """Defines the data structure for a single EPC record."""

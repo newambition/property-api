@@ -1,5 +1,5 @@
 export interface SoldProperty {
-  transaction_id: string; // Will be added later for unique keys
+  transaction_id: string;
   price: number;
   date_of_transfer: string;
   postcode: string;
@@ -21,4 +21,10 @@ export interface EpcProperty {
   potential_energy_rating: string;
   total_floor_area_sqm?: number;
   property_type: string;
+}
+
+export interface SearchParams {
+  postcode: string;
+  street?: string;
+  radius: number;
 }

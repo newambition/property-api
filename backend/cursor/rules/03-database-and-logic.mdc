@@ -1,7 +1,7 @@
 ---
 description: 
-globs: **/endpoints/**/*.py
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 ---
 description: "Rules for database queries, business logic, and data transformation."
